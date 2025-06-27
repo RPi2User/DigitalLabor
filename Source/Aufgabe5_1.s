@@ -45,8 +45,8 @@ main:
     ldr r1, =LEDMASK
     ldr r2, =PATTERN
     ldr r3, =LED_COUNT
-loop:
 
+    bl fortschrittsanzeige
 
 stop:
     nop
@@ -59,6 +59,7 @@ stop:
 //  - r1    PIN_MASK
 //  - r2    PIN_PATTERN
 //  - r3    Counter
+// NO RETURNS / NO REFUNDS!
 fortschrittsanzeige:
     push {lr}
 loop:
