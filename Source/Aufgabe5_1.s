@@ -46,17 +46,31 @@ main:
     ldr r2, =PATTERN
     ldr r3, =LED_COUNT
 loop:
-    ror     r2, #1          // right-shift pattern by 1 bit
-    bl      writeMaskedGPIOreg
-    bl      delay
-    subs    r3, r3, #1
-    bgt     loop
+
 
 stop:
     nop
     bal stop
 // ---------------------------------------------------------------------------
 // FUNCTIONS
+
+// This function requires this parameters
+//  - r0    GPIO-SET-Register
+//  - r1    PIN_MASK
+//  - r2    PIN_PATTERN
+//  - r3    Counter
+fortschrittsanzeige:
+    push {lr}
+loop:
+    ror     r2, #1          // right-shift pattern by 1 bit
+    bl      writeMaskedGPIOreg
+    bl      delay
+    subs    r3, r3, #1
+    bgt     loop
+
+
+    pop {lr}
+    bx  lr
 
 delay:
 
