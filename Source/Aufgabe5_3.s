@@ -33,13 +33,22 @@
 .equ	BUTTON_2_bm,	(1<<12)
 .equ	BUTTON_3_bm,	(1<<13)
 
-.equ	LED_MASK,		0x00ff000000
+
+// ---LEDS----------------------------------------------------------
+.equ	LED0,	(1<<16)
+.equ	LED1,	(1<<17)
+.equ	LED2,	(1<<18)
+.equ	LED3,	(1<<19)
+.equ	LED4,	(1<<20)
+.equ	LED5,	(1<<21)
+.equ	LED6,	(1<<22)
+.equ	LED7,	(1<<23)
+
 
 .text /* Specify that code goes in text segment */
 
 main:
 	bl voraufgabe
-
 	bl taster311
 
 stop:
@@ -51,7 +60,7 @@ voraufgabe:
   push {r0-r9, lr}
 init:
 
-
+worker:
 	// need to make this shit somewhat compatible with current program
 	mov r6, #1<<16 // Load mask for the LED 0 in r6
 	mov r5, #1<<10 // Load mask for the button 0 in r5
