@@ -52,6 +52,7 @@ main:
 	ldr	sp, =STACK_INIT
 	bl voraufgabe
 	bl taster311
+	bl aufgabe33
 
 stop:
 	nop
@@ -83,7 +84,7 @@ worker:
 	mov r6, r6, lsl #1 // shift mask to second LED
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
-
+	b worker		// endless loop
   pop	{r0-r6,lr}
   bx	lr
 
@@ -149,7 +150,14 @@ loop1:
 
   pop	{r0, r1, r2, lr}
   bx 	lr
+// -----------------------------------------------------------------
 
+
+aufgabe33:
+  push	{lr}
+
+  pop	{lr}
+  bx	lr
 
 
 .end
