@@ -85,9 +85,9 @@ loop:
     ror     r6, #1      // right-shift pattern by 1 bit
     and     r7,	r6, r0	// just let relevant Pins through…
     str     r7, [r3]    // set next LED
-    mvn     r8,	r6		// invert current mask
+    mvn     r8,	r6	// invert current mask
     and     r7, r8, r0	// use inverted mask to clear all LEDs excluding current one
-    str     r7,[r4]    	// clear all LEDs ex
+    str     r7,[r4]    	// clear all LEDs excl. current one
     subs    r5, r5, #1  // dec counter
     bgt     loop
     b       loop_init
