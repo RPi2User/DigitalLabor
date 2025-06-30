@@ -51,100 +51,114 @@
 
 main:
 	ldr	sp, =STACK_INIT
-
-init_iodir:
-	// 57:61 is purely optional, Port0 is on PON/Reset always Input-only
-	ldr	r0,	=IODIR0
-	// this is equal to mov r1, #0
-	ldr	r1,	=BUTTON_bm
-	and r1, r1, #0		// set all (Buttons) as Input
-	str	r1,	[r0]
-
-	ldr	r0,	=IODIR1
-	ldr r1,	=LED_MASK
-	str	r1,	[r0]		// set all LEDs as Output
-3_1:
-	// -------------------------------------------------------------
-	mov r1,	#1			// Difference between LED0 and LED1
-	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
-	ldr r3,	=IOCLR1		// provide all Clrs on Port 1
-	ldr	r4,	=IOPIN0		// provide Button reg
-	ldr	r5,	=BUTTON_0_bm// provide BT0 Bitmask
-	ldr	r6,	=LED0		// provice LED0 as init pointer
 	bl voraufgabe
-	//b 3_1
-	// -------------------------------------------------------------
-loop:
-	// pre-Init pointer regs
-	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
-	ldr r3,	=IOCLR1		// provide all Clrs on Port 1
-	ldr	r4,	=IOPIN0		// provide Button reg
+	bl taster311
+	bl aufgabe33
 
-	// bt0 LED0 and LED2 -> diff = 2
-	ldr	r5,	=BUTTON_0_bm	// bt0
-	ldr	r6,	=LED0			// LED0
-	mov r1,	#2				// LED2-LED0 -> 2
-	bl 	voraufgabe
-
-	// bt1 LED1 and LED3 -> diff = 2
-	ldr	r5,	=BUTTON_1_bm	// bt1
-	ldr	r6,	=LED1			// LED1
-	mov r1,	#2				// LED3-LED1 -> 2
-	bl 	voraufgabe
-
-	// bt2 LED4 and LED6 -> diff = 2
-	ldr	r5,	=BUTTON_2_bm	// bt2
-	ldr	r6,	=LED4			// LED4
-	mov r1,	#2				// LED4-LED6 -> 2
-	bl 	voraufgabe
-
-	// bt3 LED5 and LED7 -> diff = 2
-	ldr	r5,	=BUTTON_3_bm	// bt2
-	ldr	r6,	=LED5			// LED5
-	mov r1,	#2				// LED5-LED7 -> 2
-	bl 	voraufgabe
-	b	loop
-	// -------------------------------------------------------------
 stop:
 	nop
 	bal stop
 
-/*  This function toggles between two LEDs based on BT_Press
-*  requires:	
-*		- r1	Offset to second LED
-*		- r2	IOSET
-*		- r3	IOCLR
-*		- r4	IOPIN
-*		- r5 	BTn_Bitmask
-*		- r6	LEDn_Mask
-*		- r7	BT_MASK
-*		
-* returns: void
-*/ 
+// This function is `void` and requieres no input and returns nothing
 voraufgabe:
-  push {r0-r7, lr}
-
-	// ldr r6, =LED0 // Load mask for the LED 0 in r6
-	// ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
+  push {r0-r6, lr}
+init:
+	ldr	r2,	=IOSET1
+	ldr r3,	=IOCLR1
+	ldr r4, =IOPIN0
+worker:
+	ldr r6, =LED0 // Load mask for the LED 0 in r6
+	ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
 	ldr r0, [r4]  // Load input values from IOPIN to register r0
 
-	ands r0, r5, r7  // check if button 0 is pressed 
+	ands r0, r5, r0  // check if button 0 is pressed 
   bne noled1  // branch if button is not pressed  
 
 	// button is pressed,
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (first LED on)
-	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
+	mov r6, r6, lsl #1 // shift mask to second LED
 	str r6, [r3]  // switch pins defined in r3 off (IOCLR1) (second LED off)
 	b led_done  // brunch to end
 	// button is not pressed 
-
   noled1: 
 	str r6, [r3]  // switch pins defined in r3 off (IOCLR1) (first LED off)
-	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
+	mov r6, r6, lsl #1 // shift mask to second LED
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
 	b worker		// endless loop
-  pop	{r0-r7,lr}
+  pop	{r0-r6,lr}
   bx	lr
+
+// this function is void and need no input and returns nothing
+taster311:
+
+/* Idea:
+ * 1. CLR LED1, Set LED0
+ * 2. Wait for BT0 pressed
+ * 3. CLR LED0, SET LED1
+ * 4. Wait for BT0 pressed
+ * 5. -> 1.
+ */
+  push	{r0, r1, r2, lr}
+  bt_init:
+	ldr r0,	=IODIR0		// get DIR_Reg0
+	ldr r1, =BUTTON_bm	// get Bitmask
+	and	r1,	r1, #0		// set all pins on bitmask to zero
+	str	r1,	[r0]		// write IO_DIR0
+  led_init:
+	ldr r0, =IODIR1		// get DIR_Reg1
+	ldr r1, =(LED0 | LED1) // get LED_Bitmasks
+	str	r1, [r0]		// write to Reg
+
+// BEGIN: Loop
+loop_init:
+  clrLed1:
+	ldr r0, =IOCLR1
+	ldr r1, =LED1
+	str r1, [r0]
+  setLed0:
+	ldr r0,	=IOSET1		// get set reg of port1
+	ldr	r1,	=LED0		// get LED0_Bitmask
+	str	r1,	[r0]		// set LED0
+
+loop:
+	// best spot for a delay loop
+	ldr		r0,	=IOPIN0			// get Port0 Status reg Adress
+	ldr		r1,	=BUTTON_0_bm	// get Bitmask of bt0
+	ldr 	r2,	[r0]			// get Port0 Status VALUES
+	ands 	r2,	r2, r1			// get BT0 press-Status
+	
+	beq	loop
+
+  clrLed0:
+    ldr r0, =IOCLR1
+	ldr r1, =LED0
+	str r1, [r0]
+  setLed1:
+  	ldr r0,	=IOSET1		// get set reg of port1
+	ldr	r1,	=LED1		// get LED1_Bitmask
+	str	r1,	[r0]		// set LED1
+
+loop1:
+    // best spot for a delay loop
+	ldr		r0,	=IOPIN0			// get Port0 Status reg Adress
+	ldr		r1,	=BUTTON_0_bm	// get Bitmask of bt0
+	ldr 	r2,	[r0]			// get Port0 Status VALUES
+	ands 	r2,	r2, r1			// get BT0 press-Status
+	beq	loop1
+	// Another good spot for a delay loop
+	b   loop_init
+
+  pop	{r0, r1, r2, lr}
+  bx 	lr
+// -----------------------------------------------------------------
+
+
+aufgabe33:
+  push	{lr}
+
+  pop	{lr}
+  bx	lr
+
 
 .end
