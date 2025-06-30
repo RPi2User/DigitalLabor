@@ -58,16 +58,22 @@ stop:
 	nop
 	bal stop
 
-// This function is `void` and requieres no input and returns nothing
+/*  This function toggles between two LEDs based on BT_Press
+*  requires:	
+*		- r1	Offset to second LED
+*		- r2	IOSET
+*		- r3	IOCLR
+*		- r4	IOPIN
+*		- r5 	BT_Bitmask
+*		- r6	LED_Mask
+*		
+* returns: void
+*/ 
 voraufgabe:
   push {r0-r6, lr}
-init:
-	ldr	r2,	=IOSET1
-	ldr r3,	=IOCLR1
-	ldr r4, =IOPIN0
-worker:
-	ldr r6, =LED0 // Load mask for the LED 0 in r6
-	ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
+
+	// ldr r6, =LED0 // Load mask for the LED 0 in r6
+	// ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
 	ldr r0, [r4]  // Load input values from IOPIN to register r0
 
 	ands r0, r5, r0  // check if button 0 is pressed 
@@ -75,13 +81,14 @@ worker:
 
 	// button is pressed,
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (first LED on)
-	mov r6, r6, lsl #1 // shift mask to second LED
+	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
 	str r6, [r3]  // switch pins defined in r3 off (IOCLR1) (second LED off)
 	b led_done  // brunch to end
 	// button is not pressed 
+
   noled1: 
 	str r6, [r3]  // switch pins defined in r3 off (IOCLR1) (first LED off)
-	mov r6, r6, lsl #1 // shift mask to second LED
+	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
 	b worker		// endless loop
