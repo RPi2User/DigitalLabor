@@ -71,7 +71,7 @@ a31:
 	ldr	r4,	=IOPIN0			// provide Button reg
 	ldr	r5,	=BUTTON_0_bm	// provide BT0 Bitmask
 	ldr	r6,	=LED0			// provide LED0 
-	ldr r7,	=LED_MASK		// provide LED_MASK
+	ldr r7,	=LED_MASK		// provide OUT_MASK
 	bl voraufgabe
 	//b 3_1
 	// -------------------------------------------------------------
@@ -120,19 +120,20 @@ stop:
 *		- r4	IOPIN
 *		- r5 	BTn_Bitmask
 *		- r6	LEDn_Mask
-*		- r7	BT_MASK
+*		- r7	BT_MASK -> Does we need this thing anymore?!
 *		
 * returns: void
 */ 
 voraufgabe:
-  push {r0-r7, lr}
+  push {r0-r6, lr}
 
 	// ldr r6, =LED0 // Load mask for the LED 0 in r6
 	// ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
 	ldr r0, [r4]  // Load input values from IOPIN to register r0
 
-	ands r0, r5, r7  // check if button 0 is pressed 
-  bne noled1  // branch if button is not pressed  
+	ands r0, r5, r0  // r0 := r5 && r0
+  bne noled1  // branch if button is not pressed
+  // BTs prolly active LOW
 
 	// button is pressed,
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (first LED on)
@@ -146,7 +147,7 @@ voraufgabe:
 	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
-  pop	{r0-r7,lr}
+  pop	{r0-r6,lr}
   bx	lr
 
 .end
