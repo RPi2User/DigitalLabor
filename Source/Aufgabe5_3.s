@@ -44,13 +44,36 @@
 .equ	LED5,	(1<<21)
 .equ	LED6,	(1<<22)
 .equ	LED7,	(1<<23)
+.equ	LED_MASK(LED0 | LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7)
 
 
 .text /* Specify that code goes in text segment */
 
 main:
 	ldr	sp, =STACK_INIT
+
+init_iodir:
+	// 57:61 is purely optional, Port0 is on PON/Reset always Input-only
+	ldr	r0,	=IODIR0
+	// this is equal to mov r1, #0
+	ldr	r1,	=BUTTON_bm
+	and r1, r1, #0		// set all (Buttons) as Input
+	str	r1,	[r0]
+
+	ldr	r0,	=IODIR1
+	ldr r1,	=LED_MASK
+	str	r1,	[r0]		// set all LEDs as Output
+
+	// -------------------------------------------------------------
+	mov r1,	#1			// Difference between LED0 and LED1
+	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
+	ldr r3,	=IOCLR1		// provide all Clrs on Port 1
+	ldr	r4,	=IOPIN0		// provide Button reg
+	ldr	r5,	=BUTTON_0_bm// provide BT0 Bitmask
+	ldr	r6,	=LED0		// provice LED0 as init pointer
 	bl voraufgabe
+
+taster311:
 	bl taster311
 	bl aufgabe33
 
@@ -64,19 +87,20 @@ stop:
 *		- r2	IOSET
 *		- r3	IOCLR
 *		- r4	IOPIN
-*		- r5 	BT_Bitmask
-*		- r6	LED_Mask
+*		- r5 	BTn_Bitmask
+*		- r6	LEDn_Mask
+*		- r7	BT_MASK
 *		
 * returns: void
 */ 
 voraufgabe:
-  push {r0-r6, lr}
+  push {r0-r7, lr}
 
 	// ldr r6, =LED0 // Load mask for the LED 0 in r6
 	// ldr r5, =BUTTON_0_bm // Load mask for the button 0 in r5
 	ldr r0, [r4]  // Load input values from IOPIN to register r0
 
-	ands r0, r5, r0  // check if button 0 is pressed 
+	ands r0, r5, r7  // check if button 0 is pressed 
   bne noled1  // branch if button is not pressed  
 
 	// button is pressed,
@@ -92,7 +116,7 @@ voraufgabe:
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
 	b worker		// endless loop
-  pop	{r0-r6,lr}
+  pop	{r0-r7,lr}
   bx	lr
 
 // this function is void and need no input and returns nothing
