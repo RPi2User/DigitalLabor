@@ -71,6 +71,7 @@ a31:
 	ldr	r4,	=IOPIN0			// provide Button reg
 	ldr	r5,	=BUTTON_0_bm	// provide BT0 Bitmask
 	ldr	r6,	=LED0			// provide LED0 
+	ldr r7,	=LED_MASK		// provide LED_MASK
 	bl voraufgabe
 	//b 3_1
 	// -------------------------------------------------------------
