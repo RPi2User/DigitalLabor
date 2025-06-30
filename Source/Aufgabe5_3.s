@@ -64,6 +64,7 @@ init_iodir:
 
 	// Aufgabe 5.3.1
 	// -------------------------------------------------------------
+a31:
 	mov r1,	#1				// Difference between LED0 and LED1
 	ldr	r2,	=IOPIN1 + IOSET	// Port B + offset
 	ldr r3,	=IOPIN1 + IOCLR // Port B + offset
@@ -73,6 +74,8 @@ init_iodir:
 	bl voraufgabe
 	//b 3_1
 	// -------------------------------------------------------------
+	b a31
+	bal stop
 loop:
 	// pre-Init pointer regs
 	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
