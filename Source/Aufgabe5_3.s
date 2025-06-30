@@ -71,7 +71,6 @@ a31:
 	ldr	r4,	=IOPIN0			// provide Button reg
 	ldr	r5,	=BUTTON_0_bm	// provide BT0 Bitmask
 	ldr	r6,	=LED0			// provide LED0 
-	ldr r7,	=LED_MASK		// provide OUT_MASK
 	bl voraufgabe
 	//b 3_1
 	// -------------------------------------------------------------
@@ -120,7 +119,6 @@ stop:
 *		- r4	IOPIN
 *		- r5 	BTn_Bitmask
 *		- r6	LEDn_Mask
-*		- r7	BT_MASK -> Does we need this thing anymore?!
 *		
 * returns: void
 */ 
@@ -132,8 +130,9 @@ voraufgabe:
 	ldr r0, [r4]  // Load input values from IOPIN to register r0
 
 	ands r0, r5, r0  // r0 := r5 && r0
-  bne noled1  // branch if button is not pressed
-  // BTs prolly active LOW
+  // THIS MOFO IS ACTIVE 
+  beq noled1  // branch if button is not pressed
+  
 
 	// button is pressed,
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (first LED on)
