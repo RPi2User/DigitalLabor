@@ -42,7 +42,7 @@
 .equ	LED5,	(1<<21)
 .equ	LED6,	(1<<22)
 .equ	LED7,	(1<<23)
-.equ	LED_MASK(LED0 | LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7)
+.equ	LED_MASK,(LED0 | LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7)
 
 
 .text /* Specify that code goes in text segment */
@@ -52,13 +52,13 @@ main:
 
 init_iodir:
 	// 55:59 is purely optional, Port0 is on PON/Reset always Input-only
-	ldr	r0,	=IODIR0
+	ldr	r0,	=IOPIN0 + IODIR
 	// this is equal to mov r1, #0
 	ldr	r1,	=BUTTON_bm
 	and r1, r1, #0		// set all (Buttons) as Input
 	str	r1,	[r0]
 
-	ldr	r0,	=IODIR1
+	ldr	r0,	=IOPIN1 + IODIR
 	ldr r1,	=LED_MASK
 	str	r1,	[r0]		// set all LEDs as Output
 
@@ -78,9 +78,9 @@ a31:
 	bal stop
 loop:
 	// pre-Init pointer regs
-	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
-	ldr r3,	=IOCLR1		// provide all Clrs on Port 1
-	ldr	r4,	=IOPIN0		// provide Button reg
+	ldr	r2,	=IOPIN1 + IOSET		// provide all Outputs on Port 1 (Port B)
+	ldr r3,	=IOPIN1 + IOCLR		// provide all Clrs on Port 1
+	ldr	r4,	=IOPIN0				// provide Button reg
 
 	// bt0 LED0 and LED2 -> diff = 2
 	ldr	r5,	=BUTTON_0_bm	// bt0
@@ -145,7 +145,6 @@ voraufgabe:
 	mov r6, r6, lsl r1 // shift mask to second LED (offseted by r1)
 	str r6, [r2]  // switch pins defined in r2 on (IOSET1) (second LED on)
   led_done:  // End subrutine
-	b worker		// endless loop
   pop	{r0-r7,lr}
   bx	lr
 
