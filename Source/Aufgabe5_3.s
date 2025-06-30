@@ -17,15 +17,13 @@
 
 
 // ---PORT-REGISTER-------------------------------------------------
-.equ	IOPIN0,		0xe0028000
-.equ	IOSET0,		IOPIN0 + 4
-.equ	IODIR0,		IOSET0 + 4
-.equ	IOCLR0,		IODIR0 + 4
+.equ IOPIN0, 	0xE0028000	// Reference to Port A
+.equ IOPIN1,	0xE0028010	// Reference to Port B
+.equ IOSET, 	0x4			// Offset for port A/B -> SETPIN (Out)
+.equ IODIR, 	0x8			// Offset for port A/B -> PORT-DIRECTION
+.equ IOCLR, 	0xC			// Offset for port A/B -> CLRPIN (Out)
 // -----------------------------------------------------------------
-.equ	IOPIN1,		IOCLR0 + 4
-.equ    IOSET1,     IOPIN1 + 4
-.equ	IODIR1,     IOSET1 + 4
-.equ	IOCLR1,		IODIR1 + 4
+
 
 // ---BUTTONS-------------------------------------------------------
 .equ	BUTTON_0_bm,	(1<<10)
@@ -53,7 +51,7 @@ main:
 	ldr	sp, =STACK_INIT
 
 init_iodir:
-	// 57:61 is purely optional, Port0 is on PON/Reset always Input-only
+	// 55:59 is purely optional, Port0 is on PON/Reset always Input-only
 	ldr	r0,	=IODIR0
 	// this is equal to mov r1, #0
 	ldr	r1,	=BUTTON_bm
@@ -63,14 +61,15 @@ init_iodir:
 	ldr	r0,	=IODIR1
 	ldr r1,	=LED_MASK
 	str	r1,	[r0]		// set all LEDs as Output
-3_1:
+
+	// Aufgabe 5.3.1
 	// -------------------------------------------------------------
-	mov r1,	#1			// Difference between LED0 and LED1
-	ldr	r2,	=IOSET1		// provide all Outputs on Port 1 (Port B)
-	ldr r3,	=IOCLR1		// provide all Clrs on Port 1
-	ldr	r4,	=IOPIN0		// provide Button reg
-	ldr	r5,	=BUTTON_0_bm// provide BT0 Bitmask
-	ldr	r6,	=LED0		// provice LED0 as init pointer
+	mov r1,	#1				// Difference between LED0 and LED1
+	ldr	r2,	=IOPIN1 + IOSET	// Port B + offset
+	ldr r3,	=IOPIN1 + IOCLR // Port B + offset
+	ldr	r4,	=IOPIN0			// provide Button reg
+	ldr	r5,	=BUTTON_0_bm	// provide BT0 Bitmask
+	ldr	r6,	=LED0			// provide LED0 
 	bl voraufgabe
 	//b 3_1
 	// -------------------------------------------------------------
