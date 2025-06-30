@@ -12,15 +12,24 @@
 .text /* Specify that code goes in text segment /
 .code 32 / Select ARM instruction set /
 .global main / Specify global symbol */
-.equ BUTTON_0, (1<<10)
-.equ BUTTON_1, (1<<11)
-.equ BUTTON_2, (1<<12)
-.equ BUTTON_3, (1<<13)
+// ---BUTTONS-------------------------------------------------------
+.equ	BUTTON_0_bm,	(1<<10)
+.equ	BUTTON_1_bm,	(1<<11)
+.equ	BUTTON_2_bm,	(1<<12)
+.equ	BUTTON_3_bm,	(1<<13)
+.equ	BUTTON_bm,		(BUTTON_0_bm | BUTTON_1_bm | BUTTON_2_bm | BUTTON_3_bm)
 
-.equ LED_0, (1<<16)
-.equ LED_1, (1<<17)
-.equ LED_4, (1<<20)
-.equ LED_5, (1<<21)
+
+// ---LEDS----------------------------------------------------------
+.equ	LED0,	(1<<16)
+.equ	LED1,	(1<<17)
+.equ	LED2,	(1<<18)
+.equ	LED3,	(1<<19)
+.equ	LED4,	(1<<20)
+.equ	LED5,	(1<<21)
+.equ	LED6,	(1<<22)
+.equ	LED7,	(1<<23)
+.equ	LED_MASK(LED0 | LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7)
 
 .equ PARTNER_SHIFT, 2
 
