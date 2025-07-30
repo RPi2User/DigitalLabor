@@ -25,7 +25,7 @@
 .equ    PATTERN,    1 << 23     // starting at LED7
 
 // MISC
-.equ    DELAY,      0x00800000  // delay should be noticeble
+.equ    DELAY,      0x00200000  // delay should be noticeble
 .equ    stackInit,  0x40001000  // Stackpointer init-address
 
 .text /* Specify that code goes in text segment */

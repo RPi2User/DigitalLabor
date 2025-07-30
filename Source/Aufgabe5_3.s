@@ -11,48 +11,66 @@
 .text /* Specify that code goes in text segment */
 .code 32 /* Select ARM instruction set */
 .global main /* Specify global symbol */
-.equ BUTTON_0, (1<<10)          
-.equ BUTTON_1, (1<<11)          
-.equ BUTTON_2, (1<<12)          
-.equ BUTTON_3, (1<<13)         
 
-.equ LED_0, (1<<16)             
-.equ LED_1, (1<<17)             
-.equ LED_4, (1<<20)             
-.equ LED_5, (1<<21)             
+// ---SYSTEM-REGISTER-----------------------------------------------
+.equ	STACK_INIT,	0x40001000
+.equ PARTNER_SHIFT, 2
 
-.equ PARTNER_SHIFT, 2          
 
-.equ IOPIN0, 0xE0028000         // Adresse des Port-0-Pinwertregisters
-.equ IOPIN1, 0xE0028010         // Adresse des Port-1-Pinwertregisters
-.equ IOSET1, 0x4                // Adresse des Port-1-Ausgangs-Setzregisters
-.equ IODIR1, 0x8                // Adresse des Port-1-Richtungsregisters
-.equ IOCLR1, 0xC                // Adresse des Port-1-Ausgangs-Löschregisters
+// ---PORT-REGISTER-------------------------------------------------
+.equ IOPIN0, 	0xE0028000	// Reference to Port A
+.equ IOPIN1,	0xE0028010	// Reference to Port B
+.equ IOSET, 	0x4			// Offset for port A/B -> SETPIN (Out)
+.equ IODIR, 	0x8			// Offset for port A/B -> PORT-DIRECTION
+.equ IOCLR, 	0xC			// Offset for port A/B -> CLRPIN (Out)
+// -----------------------------------------------------------------
+
+
+// ---BUTTONS-------------------------------------------------------
+.equ	BUTTON_0,	(1<<10)
+.equ	BUTTON_1,	(1<<11)
+.equ	BUTTON_2,	(1<<12)
+.equ	BUTTON_3,	(1<<13)
+.equ	BUTTON,		(BUTTON_0 | BUTTON_1 | BUTTON_2 | BUTTON_3)
+
+
+// ---LEDS----------------------------------------------------------
+.equ	LED0,	(1<<16)
+.equ	LED1,	(1<<17)
+.equ	LED2,	(1<<18)
+.equ	LED3,	(1<<19)
+.equ	LED4,	(1<<20)
+.equ	LED5,	(1<<21)
+.equ	LED6,	(1<<22)
+.equ	LED7,	(1<<23)
+.equ	LED_MASK,(LED0 | LED1 | LED2 | LED3 | LED4 | LED5 | LED6 | LED7)             
+
+          
 
 main:
        ldr r4, =IOPIN0            
        ldr r8, =IOPIN1            
 
        ldr r0, =0x00ff0000        // LED-Maske laden (Pins 16–23)
-       ldr r1, [r8, #IODIR1]      // Liest den aktuellen Zustand des Port-1-Richtungsregisters
+       ldr r1, [r8, #IODIR]      // Liest den aktuellen Zustand des Port-1-Richtungsregisters
        orr r1, r0                 // Fügt die LED-Pins als Ausgänge hinzu
-       str r0, [r8, #IODIR1]      // Speichert die manipulierte Konfiguration zurück in das Richtungsregister
+       str r0, [r8, #IODIR]      // Speichert die manipulierte Konfiguration zurück in das Richtungsregister
 
 loop:
        ldr r7, =BUTTON_0        // Lädt die Maske für Taste 0 in das Register r7
-       ldr r6, =LED_0           // Lädt die Maske für LED 0 in das Register r6
+       ldr r6, =LED0           // Lädt die Maske für LED 0 in das Register r6
        bl switch_led            // Springt zur Unterroutine switch_led
 
        ldr r7, =BUTTON_1        // Lädt die Maske für Taste 1 in das Register r7
-       ldr r6, =LED_1           // Lädt die Maske für LED 1 in das Register r6
+       ldr r6, =LED1           // Lädt die Maske für LED 1 in das Register r6
        bl switch_led            // Springt zur Unterroutine switch_led
 
        ldr r7, =BUTTON_2        // Lädt die Maske für Taste 2 in das Register r7
-       ldr r6, =LED_4           // Lädt die Maske für LED 2 in das Register r6
+       ldr r6, =LED4           // Lädt die Maske für LED 2 in das Register r6
        bl switch_led            // Springt zur Unterroutine switch_led
 
        ldr r7, =BUTTON_3        // Lädt die Maske für Taste 3 in das Register r7
-       ldr r6, =LED_5           // Lädt die Maske für LED 3 in das Register r6
+       ldr r6, =LED5           // Lädt die Maske für LED 3 in das Register r6
        bl switch_led            // Springt zur Unterroutine switch_led
 
        b loop                   // Springt zurück zur Schleife
@@ -64,15 +82,15 @@ switch_led:
        ands r0, r5, r0                   // Prüft, ob die entsprechende Taste gedrückt ist
        beq noled1                        // Springt zu noled1, wenn keine Taste gedrückt ist (z=1)
 
-       str r9, [r8, #IOSET1]             // Wenn die Taste nicht gedrückt ist, schaltet die LED ein (IOSET1)
+       str r9, [r8, #IOSET]             // Wenn die Taste nicht gedrückt ist, schaltet die LED ein (IOSET1)
        mov r9, r9, lsl #2                // Verschiebt zur Partner-LED
-       str r9, [r8, #IOCLR1]             // Schaltet die Partner-LED aus (IOCLR1)
+       str r9, [r8, #IOCLR]             // Schaltet die Partner-LED aus (IOCLR1)
        ldmfd sp!, {r0, r5, r8, r9, pc}   // Stellt r0, r5, r8, r9 und lr wieder her
 
 noled1:                                  // Wenn die Taste gedrückt ist
-       str r9, [r8, #IOCLR1]             // Schaltet die LED aus
+       str r9, [r8, #IOCLR]             // Schaltet die LED aus
        mov r9, r9, lsl #2                // Verschiebt zur Partner-LED
-       str r9, [r8, #IOSET1]             // Schaltet die Partner-LED ein
+       str r9, [r8, #IOSET]             // Schaltet die Partner-LED ein
        ldmfd sp!, {r0, r5, r8, r9, pc}   // Stellt r0, r5, r8, r9 und lr wieder her
 
 stop:
