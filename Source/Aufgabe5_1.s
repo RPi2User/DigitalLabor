@@ -64,7 +64,7 @@ fortschrittsanzeige:
     push {lr}
 loop:
     ror     r2, #1          // right-shift pattern by 1 bit
-    bl      writeMaskedGPIOreg
+    bl      writeMaskedGPI5Oreg
     bl      delay
     subs    r3, r3, #1
     bgt     loop
